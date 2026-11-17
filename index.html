@@ -315,12 +315,12 @@
     </div>
 
     <div class="atelier">
-      <div class="atelier-head photo" data-photo="miroir"><span>🇳🇿</span><h3>Nouvelle-Zélande &amp; anglais</h3></div>
+      <div class="atelier-head photo" data-photo="miroir"><span id="voyageFlag">🌍</span><h3 id="voyageTitle">Voyage du jour</h3></div>
       <div class="atelier-body">
         <div id="nzQuestions">
           <p><b>Les jours de la semaine en anglais</b> (le jour d’aujourd’hui, plus trois autres) :</p>
           <div id="nzWeekdayQuestions"></div>
-          <p style="margin-top:16px;"><b>Un peu de culture néo-zélandaise</b> :</p>
+          <p id="voyageIntro" style="margin-top:16px;"></p>
           <div id="nzFactQuestions"></div>
         </div>
         <button class="btn-check" data-block="nz">Vérifier mes réponses</button>
@@ -480,28 +480,84 @@ const PHOTO_ORDER=["maquis", "aube", "miroir", "vue", "sable", "voiliers", "couc
     C(3, "La Nouvelle-Calédonie se situe dans l'hémisphère...", "sud", [['sud','Sud'],['nord','Nord']], "Elle est au sud de l'équateur.")
   ];
 
-  /* ================== NOUVELLE-ZELANDE & ANGLAIS ================== */
-  var NZ_FACTS = [
-    T(1, "La capitale de la Nouvelle-Zélande est ______.", "Wellington", ['Auckland','Sydney','Canberra'], "Wellington est la capitale ; Auckland est la plus grande ville."),
-    T(1, "La Nouvelle-Zélande est composée de deux grandes îles : l'île du Nord et l'île du ______.", "Sud", ['Est','Ouest','Centre']),
-    S(1, "Cet oiseau qui ne vole pas est l'emblème de la Nouvelle-Zélande :", "kiwi", [['kiwi','le kiwi'],['cagou','le cagou'],['dugong','le dugong']], "Le kiwi est l'oiseau symbole de la Nouvelle-Zélande (le cagou est celui de la Nouvelle-Calédonie)."),
-    C(1, "Le peuple autochtone de Nouvelle-Zélande s'appelle le peuple...", "maori", [['maori','maori'],['kanak','kanak']], "Les Maoris sont le peuple autochtone de Nouvelle-Zélande ; les Kanak sont celui de Nouvelle-Calédonie."),
-    T(1, "La danse traditionnelle maorie exécutée avant les matchs de rugby s'appelle le ______.", "haka", ['hula','tamouré','samba']),
-    TF(1, "En Nouvelle-Zélande, il y a plus de moutons que d'habitants.", "vrai"),
-    TF(1, "La Nouvelle-Zélande se trouve aussi dans l'océan Pacifique.", "vrai"),
-    TF(1, "La Nouvelle-Zélande se situe au sud-est de la Nouvelle-Calédonie.", "vrai"),
-    TF(1, "On parle anglais et maori en Nouvelle-Zélande.", "vrai"),
-    TF(1, "Auckland est la plus grande ville de Nouvelle-Zélande.", "vrai"),
-    T(1, "Le plus haut sommet de Nouvelle-Zélande s'appelle Aoraki, ou mont ______.", "Cook", ['Blanc','Panié','Fuji'], "Aoraki / Mount Cook mesure plus de 3 700 mètres."),
-    T(1, "Comment dit-on « bonjour » en anglais ? ______", "hello", ['goodbye','please','sorry']),
-    T(1, "Comment dit-on « merci » en anglais ? ______", "thank you", ['please','sorry','welcome']),
-    T(1, "Comment dit-on « la plage » en anglais ? ______", "the beach", ['the sea','the sand','the boat']),
-    T(1, "Comment dit-on « le soleil » en anglais ? ______", "the sun", ['the moon','the star','the sky']),
-    T(1, "Comment dit-on « rouge » en anglais ? ______", "red", ['blue','green','yellow']),
-    T(1, "Comment dit-on « trois » en anglais ? ______", "three", ['two','four','five']),
-    T(1, "Comment dit-on « un poisson » en anglais ? ______", "a fish", ['a bird','a shark','a dog']),
-    T(1, "Comment dit-on « la mer » en anglais ? ______", "the sea", ['the sun','the sand','the rain'])
+  /* ================== VOYAGE DU JOUR : un pays différent chaque jour ================== */
+  var CONTS = ['Europe','Asie','Afrique','Amérique du Nord','Amérique du Sud','Océanie'];
+  // [drapeau, nom, "Le pays", "du pays", "au pays", capitale, [pièges], continent, langue, [pièges], [[question, réponse, [pièges]], [..]]]
+  var COUNTRIES = [
+    ['🇳🇿','Nouvelle-Zélande',"La Nouvelle-Zélande","de la Nouvelle-Zélande","en Nouvelle-Zélande",'Wellington',['Auckland','Sydney','Canberra'],'Océanie',"l'anglais",["le japonais","l'espagnol","l'allemand"],
+      [["L'oiseau qui ne vole pas, emblème du pays, est le ______.","kiwi",['cagou','manchot','émeu']],["La danse maorie que font les joueurs de rugby avant un match est le ______.","haka",['hula','tango','flamenco']]]],
+    ['🇦🇺','Australie',"L'Australie","de l'Australie","en Australie",'Canberra',['Sydney','Melbourne','Perth'],'Océanie',"l'anglais",["l'italien","le russe","le chinois"],
+      [["L'animal qui saute et porte son bébé dans une poche est le ______.","kangourou",['koala','lama','lapin']],["Le célèbre opéra en forme de voiles, au bord de l'eau, est à ______.","Sydney",['Canberra','Perth','Darwin']]]],
+    ['🇻🇺','Vanuatu',"Le Vanuatu","du Vanuatu","au Vanuatu",'Port-Vila',['Nouméa','Honiara','Suva'],'Océanie',"le bislama (et le français ou l'anglais)",["le japonais","le russe","le grec"],
+      [["Le Vanuatu est connu pour ses ______ en activité.","volcans",['glaciers','déserts','gratte-ciel']],["Par rapport à la Nouvelle-Calédonie, le Vanuatu est situé au ______.","nord-est",['sud-ouest','sud','ouest']]]],
+    ['🇫🇯','Fidji',"Les Fidji","des Fidji","aux Fidji",'Suva',['Nadi','Apia','Port-Vila'],'Océanie',"l'anglais, le fidjien et l'hindi",["le suédois","le coréen","le polonais"],
+      [["Les Fidji sont un archipel de plus de ______ îles.","300",['30','3','3000']],["Les Fidji sont très forts au rugby à ______ (médaille d'or aux Jeux olympiques).","sept",['quinze','treize','trois']]]],
+    ['🇯🇵','Japon',"Le Japon","du Japon","au Japon",'Tokyo',['Kyoto','Osaka','Pékin'],'Asie',"le japonais",["le coréen","le chinois","l'anglais"],
+      [["Le plus haut sommet du pays est le mont ______.","Fuji",['Blanc','Everest','Panié']],["Le plat de riz avec du poisson cru s'appelle les ______.","sushis",['pizzas','crêpes','tacos']]]],
+    ['🇨🇳','Chine',"La Chine","de la Chine","en Chine",'Pékin',['Shanghai','Tokyo','Hong Kong'],'Asie',"le chinois (mandarin)",["le japonais","l'hindi","le thaï"],
+      [["L'animal noir et blanc qui mange du bambou est le ______.","panda",['koala','zèbre','ours polaire']],["Une très longue construction traverse le nord du pays : la Grande ______ de Chine.","Muraille",['Pyramide','Tour','Avenue']]]],
+    ['🇮🇳','Inde',"L'Inde","de l'Inde","en Inde",'New Delhi',['Mumbai','Calcutta','Karachi'],'Asie',"l'hindi (et l'anglais)",["l'arabe","le portugais","le russe"],
+      [["Le palais de marbre blanc le plus célèbre est le ______.","Taj Mahal",['Colisée','Big Ben','Parthénon']],["Le grand fleuve sacré du pays est le ______.","Gange",['Nil','Amazone','Rhin']]]],
+    ['🇹🇭','Thaïlande',"La Thaïlande","de la Thaïlande","en Thaïlande",'Bangkok',['Phuket','Hanoï','Manille'],'Asie',"le thaï",["le japonais","le coréen","l'indonésien"],
+      [["L'animal symbole du pays est l'______.","éléphant",['ours','zèbre','lion']],["La Thaïlande est surnommée le pays du ______.","sourire",['froid','désert','soleil levant']]]],
+    ['🇮🇩','Indonésie',"L'Indonésie","de l'Indonésie","en Indonésie",'Jakarta',['Bali','Manille','Bangkok'],'Asie',"l'indonésien",["le thaï","le japonais","le hindi"],
+      [["L'île touristique la plus célèbre du pays s'appelle ______.","Bali",['Tahiti','Lifou','Ouvéa']],["Le dragon de Komodo est un très grand ______.","lézard",['serpent','oiseau','poisson']]]],
+    ['🇰🇷','Corée du Sud',"La Corée du Sud","de la Corée du Sud","en Corée du Sud",'Séoul',['Pékin','Tokyo','Busan'],'Asie',"le coréen",["le japonais","le chinois","le thaï"],
+      [["Le plat de chou épicé et fermenté s'appelle le ______.","kimchi",['sushi','couscous','taboulé']],["La « K-pop » est un style de ______.","musique",['peinture','sport','cuisine']]]],
+    ['🇪🇬','Égypte',"L'Égypte","de l'Égypte","en Égypte",'Le Caire',['Alexandrie','Louxor','Tunis'],'Afrique',"l'arabe",["le grec","le turc","le swahili"],
+      [["Les grands tombeaux des pharaons sont les ______.","pyramides",['pagodes','igloos','châteaux']],["Le grand fleuve qui traverse le pays est le ______.","Nil",['Congo','Gange','Amazone']]]],
+    ['🇲🇦','Maroc',"Le Maroc","du Maroc","au Maroc",'Rabat',['Casablanca','Marrakech','Alger'],'Afrique',"l'arabe (et l'amazigh)",["le russe","le chinois","le japonais"],
+      [["Le plat de semoule avec des légumes et de la viande est le ______.","couscous",['sushi','paella','raclette']],["Le grand désert qui s'étend au sud est le ______.","Sahara",['Gobi','Atacama','Kalahari']]]],
+    ['🇸🇳','Sénégal',"Le Sénégal","du Sénégal","au Sénégal",'Dakar',['Abidjan','Bamako','Accra'],'Afrique',"le français (langue officielle)",["l'anglais","le portugais","l'espagnol"],
+      [["Le « lac Rose » du pays est célèbre pour son eau de couleur ______.","rose",['bleue','verte','noire']],["Dakar est au bord de l'océan ______.","Atlantique",['Pacifique','Indien','Arctique']]]],
+    ['🇰🇪','Kenya',"Le Kenya","du Kenya","au Kenya",'Nairobi',['Mombasa','Kampala','Addis-Abeba'],'Afrique',"le swahili (et l'anglais)",["le japonais","le portugais","le russe"],
+      [["Dans la savane vit le « roi des animaux » : le ______.","lion",['tigre','ours','loup']],["Le Kenya est traversé par la ligne de l'______.","équateur",['Antarctique','Atlantique','Himalaya']]]],
+    ['🇹🇳','Tunisie',"La Tunisie","de la Tunisie","en Tunisie",'Tunis',['Sfax','Alger','Tripoli'],'Afrique',"l'arabe",["le chinois","le russe","l'italien"],
+      [["La Tunisie est au bord de la mer ______.","Méditerranée",['Rouge','Noire','du Nord']],["Les touristes visitent les ruines de l'ancienne ville de ______.","Carthage",['Troie','Pompéi','Machu Picchu']]]],
+    ['🇲🇬','Madagascar',"Madagascar","de Madagascar","à Madagascar",'Antananarivo',['Toamasina','Nairobi','Maputo'],'Afrique',"le malgache (et le français)",["le japonais","le russe","le coréen"],
+      [["Le petit animal à grands yeux et à longue queue rayée qui vit là-bas est le ______.","lémurien",['koala','kangourou','panda']],["Le grand arbre au tronc énorme, symbole du pays, est le ______.","baobab",['pin','cocotier','sapin']]]],
+    ['🇫🇷','France',"La France","de la France","en France",'Paris',['Lyon','Marseille','Bordeaux'],'Europe',"le français",["l'italien","l'anglais","l'allemand"],
+      [["Le monument de fer de 330 mètres de haut est la tour ______.","Eiffel",['Big Ben','de Pise','du Soleil']],["Le drapeau est bleu, blanc et ______.","rouge",['vert','jaune','noir']]]],
+    ['🇮🇹','Italie',"L'Italie","de l'Italie","en Italie",'Rome',['Milan','Venise','Naples'],'Europe',"l'italien",["l'espagnol","le français","le grec"],
+      [["La ville construite sur l'eau, avec ses canaux et ses gondoles, est ______.","Venise",['Rome','Naples','Florence']],["Le Colisée est un immense ______ construit par les Romains.","amphithéâtre",['château','temple','pont']]]],
+    ['🇪🇸','Espagne',"L'Espagne","de l'Espagne","en Espagne",'Madrid',['Barcelone','Séville','Lisbonne'],'Europe',"l'espagnol",["le portugais","l'italien","le français"],
+      [["Le plat de riz au safran est la ______.","paella",['pizza','raclette','choucroute']],["La danse traditionnelle du sud du pays est le ______.","flamenco",['haka','hula','tamouré']]]],
+    ['🇬🇷','Grèce',"La Grèce","de la Grèce","en Grèce",'Athènes',['Rome','Istanbul','Sparte'],'Europe',"le grec",["le turc","l'italien","le latin"],
+      [["Le temple antique qui domine Athènes est le ______.","Parthénon",['Colisée','Louvre','Panthéon']],["Les Jeux ______ sont nés en Grèce, il y a très longtemps.","olympiques",['du cirque','vidéo','de société']]]],
+    ['🇬🇧','Royaume-Uni',"Le Royaume-Uni","du Royaume-Uni","au Royaume-Uni",'Londres',['Édimbourg','Dublin','Manchester'],'Europe',"l'anglais",["le français","l'allemand","l'espagnol"],
+      [["La célèbre horloge de Londres s'appelle Big ______.","Ben",['Tom','Jack','Paul']],["Au Royaume-Uni, on conduit du côté ______ de la route.","gauche",['droit','central','arrière']]]],
+    ['🇩🇪','Allemagne',"L'Allemagne","de l'Allemagne","en Allemagne",'Berlin',['Munich','Vienne','Hambourg'],'Europe',"l'allemand",["le néerlandais","le polonais","le russe"],
+      [["Les frères Grimm ont écrit des ______ comme « Hansel et Gretel ».","contes",['chansons','bandes dessinées','recettes']],["Le grand fleuve qui traverse le pays s'appelle le ______.","Rhin",['Nil','Amazone','Mississippi']]]],
+    ['🇳🇴','Norvège',"La Norvège","de la Norvège","en Norvège",'Oslo',['Stockholm','Bergen','Copenhague'],'Europe',"le norvégien",["le finnois","le russe","l'anglais seulement"],
+      [["Les longs bras de mer entourés de hautes falaises sont les ______.","fjords",['lagons','geysers','atolls']],["La lumière colorée qu'on voit dans le ciel du nord est l'aurore ______.","boréale",['australe','tropicale','lunaire']]]],
+    ['🇷🇺','Russie',"La Russie","de la Russie","en Russie",'Moscou',['Saint-Pétersbourg','Kiev','Minsk'],'Europe et Asie',"le russe",["le chinois","l'ukrainien","le polonais"],
+      [["La Russie est le plus ______ pays du monde.","grand",['petit','chaud','peuplé']],["Les poupées qui s'emboîtent les unes dans les autres s'appellent les ______.","matriochkas",['quokkas','piñatas','marionnettes']]]],
+    ['🇨🇦','Canada',"Le Canada","du Canada","au Canada",'Ottawa',['Toronto','Montréal','Vancouver'],'Amérique du Nord',"l'anglais et le français",["l'espagnol et le portugais","le russe","le japonais"],
+      [["Sur le drapeau, il y a une feuille d'______.","érable",['chêne','palmier','laurier']],["L'animal du nord aux grands bois plats est l'______.","orignal",['autruche','okapi','éland']]]],
+    ['🇺🇸','États-Unis',"Les États-Unis","des États-Unis","aux États-Unis",'Washington',['New York','Los Angeles','Chicago'],'Amérique du Nord',"l'anglais",["le français","l'espagnol seulement","l'allemand"],
+      [["La statue offerte par la France et installée à New York est la statue de la ______.","Liberté",['Paix','Victoire','Justice']],["Le drapeau américain a 50 ______, une pour chaque État.","étoiles",['croix','soleils','lunes']]]],
+    ['🇲🇽','Mexique',"Le Mexique","du Mexique","au Mexique",'Mexico',['Cancún','Acapulco','Guadalajara'],'Amérique du Nord',"l'espagnol",["le portugais","l'anglais","le français"],
+      [["Les anciens bâtisseurs de grandes pyramides au Mexique étaient les ______.","Mayas",['Vikings','Romains','Inuits']],["La galette de maïs servie avec de la viande ou des légumes est la ______.","tortilla",['baguette','pizza','crêpe']]]],
+    ['🇵🇪','Pérou',"Le Pérou","du Pérou","au Pérou",'Lima',['Cusco','Quito','Bogota'],'Amérique du Sud',"l'espagnol (et le quechua)",["le portugais","l'italien","l'anglais"],
+      [["La cité inca perchée dans les montagnes s'appelle Machu ______.","Picchu",['Petra','Tikal','Angkor']],["L'animal à laine et à long cou des montagnes andines est le ______.","lama",['dromadaire','zèbre','kangourou']]]],
+    ['🇧🇷','Brésil',"Le Brésil","du Brésil","au Brésil",'Brasilia',['Rio de Janeiro','São Paulo','Salvador'],'Amérique du Sud',"le portugais",["l'espagnol","l'anglais","le français"],
+      [["Le plus grand fleuve du pays, au cœur de la forêt tropicale, est l'______.","Amazone",['Nil','Danube','Mississippi']],["Le Brésil a gagné cinq fois la Coupe du monde de ______.","football",['rugby','basket','tennis']]]],
+    ['🇦🇷','Argentine',"L'Argentine","de l'Argentine","en Argentine",'Buenos Aires',['Santiago','Lima','Montevideo'],'Amérique du Sud',"l'espagnol",["le portugais","l'italien seulement","l'anglais"],
+      [["La danse célèbre née à Buenos Aires est le ______.","tango",['flamenco','haka','hula']],["Le célèbre footballeur argentin s'appelle Lionel ______.","Messi",['Zidane','Pelé','Federer']]]]
   ];
+  function voyageOf(d){ return COUNTRIES[((d - START_DAY) % COUNTRIES.length + COUNTRIES.length) % COUNTRIES.length]; }
+  function voyageQuestions(d){
+    var c = voyageOf(d);
+    var contD = CONTS.filter(function(x){ return x !== c[7] && c[7].indexOf(x) === -1; });
+    var qs = [
+      T(1, "La capitale "+c[3].replace(/^de la /,'de la ').replace(/^du /,'du ').replace(/^de l'/,"de l'")+" est ______.", c[5], c[6]),
+      T(1, c[2]+" se trouve sur le continent ______.", c[7], sample(contD, 3)),
+      T(1, "Quelle langue parle-t-on principalement "+c[4]+" ? ______", c[8], c[9])
+    ];
+    c[10].forEach(function(x){ qs.push(T(1, x[0], x[1], x[2])); });
+    return qs;
+  }
+  var NZ_FACTS = [];
 
   /* ================== BANQUE FRANCAIS ================== */
   var NAT_EXPLAIN = {
@@ -1173,7 +1229,7 @@ const PHOTO_ORDER=["maquis", "aube", "miroir", "vue", "sable", "voiliers", "couc
     renderBlock('mathsQuestions', generateMathQuestions(L));
     renderBlock('frQuestions', pickFromPool('fr', FR_POOL, 10, L));
     renderBlock('nzWeekdayQuestions', nzWeekdayQuestions(currentDay));
-    renderBlock('nzFactQuestions', pickFromPool('nz', NZ_FACTS, 3, 1));
+    var vc = voyageOf(currentDay); document.getElementById('voyageFlag').textContent = vc[0]; document.getElementById('voyageTitle').textContent = 'Voyage du jour : '+vc[1]+' & anglais'; document.getElementById('voyageIntro').innerHTML = '<b>Aujourd’hui on voyage '+vc[4]+' !</b> Quelques questions de culture générale :'; renderBlock('nzFactQuestions', voyageQuestions(currentDay));
     var bonus = pickBonus();
     document.getElementById('bonusText').textContent = bonus.text;
     renderBlock('bonusQuestions', bonus.questions);
